@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glow Up Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fdf6f0;--blush:#e8c4b8;--rose:#c9897a;--deep:#6b3d3d;--mist:#f2e8e3;--gold:#c4a882;--lavender:#b8aec9;--green:#a8c5a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--cream);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:4rem;
+  background-image:radial-gradient(ellipse at 10% 0%,rgba(200,137,122,0.15) 0%,transparent 50%),radial-gradient(ellipse at 90% 100%,rgba(184,174,201,0.2) 0%,transparent 50%);}
+nav{display:flex;justify-content:center;gap:0.5rem;padding:1.5rem 1rem 0;flex-wrap:wrap;}
+.nav-btn{background:white;border:1px solid rgba(200,137,122,0.2);border-radius:20px;padding:0.4rem 1.1rem;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--deep);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.2s;}
+.nav-btn:hover,.nav-btn.active{background:var(--rose);color:white;border-color:var(--rose);}
+.page{display:none;max-width:700px;margin:0 auto;padding:1.5rem 1rem 4rem;}
+.page.active{display:block;}
+h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(2rem,5vw,3rem);color:var(--deep);letter-spacing:0.06em;text-align:center;margin-bottom:0.2rem;}
+.subtitle{font-size:0.62rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--rose);text-align:center;margin-bottom:1.5rem;}
+.banner-row{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-bottom:0.9rem;}
+.banner-card{background:white;border-radius:14px;padding:1rem;border:1px solid rgba(200,137,122,0.15);text-align:center;}
+.banner-label{font-size:0.52rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem;}
+.banner-num{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;color:var(--rose);line-height:1;}
+.banner-sub{font-size:0.52rem;color:var(--deep);letter-spacing:0.06em;margin-top:0.15rem;}
+.phase-pill{display:inline-block;padding:0.2rem 0.7rem;border-radius:20px;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:500;margin-top:0.25rem;}
+.phase-menstrual{background:#fde8e8;color:#c04040;}
+.phase-follicular{background:#fef3e2;color:#b07830;}
+.phase-ovulation{background:#e8f5e8;color:#3a8a3a;}
+.phase-luteal{background:#ede8f5;color:#6040a0;}
+.phase-tip{font-size:0.52rem;color:#888;margin-top:0.3rem;line-height:1.4;font-style:italic;}
+.card{background:white;border-radius:14px;padding:1.1rem 1.2rem;border:1px solid rgba(200,137,122,0.12);margin-bottom:0.8rem;}
+.card-title{font-size:0.58rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--rose);font-weight:500;margin-bottom:0.85rem;}
+.field{margin-bottom:0.75rem;}.field:last-child{margin-bottom:0;}
+.field label{display:block;font-size:0.6rem;color:var(--deep);font-weight:500;letter-spacing:0.08em;margin-bottom:0.28rem;}
+.field input[type=number],.field input[type=text],.field input[type=date],.field textarea{width:100%;border:1px solid var(--blush);border-radius:8px;padding:0.45rem 0.65rem;font-size:0.7rem;font-family:'DM Sans',sans-serif;color:var(--deep);background:white;outline:none;transition:border-color 0.2s;}
+.field input:focus,.field textarea:focus{border-color:var(--rose);}
+.field textarea{resize:vertical;min-height:55px;}
+.w80{width:80px!important;}
+.pills{display:flex;flex-wrap:wrap;gap:0.35rem;}
+.pill{padding:0.28rem 0.75rem;border-radius:20px;border:1px solid var(--blush);font-size:0.58rem;letter-spacing:0.05em;cursor:pointer;transition:all 0.15s;color:var(--deep);background:white;font-family:'DM Sans',sans-serif;}
+.pill:hover{border-color:var(--rose);}
+.pill.selected{background:var(--rose);color:white;border-color:var(--rose);}
+.pill.sel-lav{background:var(--lavender);color:white;border-color:var(--lavender);}
+.pill.sel-green{background:var(--green);color:white;border-color:var(--green);}
+.check-row{display:flex;align-items:center;gap:0.6rem;padding:0.38rem 0;border-bottom:1px solid var(--mist);}
+.check-row:last-child{border-bottom:none;}
+.check-row input[type=checkbox]{-webkit-appearance:none;appearance:none;width:13px;height:13px;border:1.5px solid var(--blush);border-radius:3px;cursor:pointer;flex-shrink:0;position:relative;background:white;transition:all 0.15s;}
+.check-row input:checked{background:var(--rose);border-color:var(--rose);}
+.check-row input:checked::after{content:'';position:absolute;left:2px;top:0;width:5px;height:8px;border:1.5px solid white;border-top:none;border-left:none;transform:rotate(45deg);}
+.check-row label{font-size:0.65rem;color:var(--deep);cursor:pointer;}
+.section-sub{font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;margin:0.7rem 0 0.4rem;}
+.section-sub.am{color:var(--gold);}
+.section-sub.pm{color:var(--lavender);}
+.caff-row{display:grid;grid-template-columns:1fr auto auto;gap:0.5rem;align-items:end;margin-bottom:0.5rem;padding-bottom:0.5rem;border-bottom:1px solid var(--mist);}
+.caff-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.caff-time-pills{display:flex;gap:0.3rem;}
+.caff-time-pill{padding:0.2rem 0.5rem;border-radius:12px;border:1px solid var(--blush);font-size:0.55rem;cursor:pointer;color:var(--deep);background:white;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.caff-time-pill.active{background:var(--gold);color:white;border-color:var(--gold);}
+.add-caff-btn{background:none;border:1px dashed var(--blush);border-radius:8px;padding:0.35rem 0.7rem;font-size:0.58rem;color:var(--rose);cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;margin-top:0.3rem;transition:all 0.15s;}
+.add-caff-btn:hover{background:var(--mist);}
+.day-nav{display:flex;justify-content:center;align-items:center;gap:0.8rem;margin-bottom:1.1rem;}
+.day-nav-btn{background:white;border:1px solid var(--blush);border-radius:20px;padding:0.3rem 0.9rem;font-size:0.62rem;cursor:pointer;color:var(--deep);font-family:'DM Sans',sans-serif;transition:all 0.15s;}
+.day-nav-btn:hover{border-color:var(--rose);}
+.day-nav-btn:disabled{opacity:0.3;pointer-events:none;}
+#selected-date-label{font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--deep);font-weight:500;min-width:80px;text-align:center;}
+.save-btn{width:100%;padding:0.7rem;background:var(--rose);color:white;border:none;border-radius:10px;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:all 0.2s;margin-top:0.4rem;}
+.save-btn:hover{background:var(--deep);}
+.save-msg{text-align:center;font-size:0.6rem;color:var(--green);letter-spacing:0.1em;margin-top:0.4rem;height:1rem;}
+/* TRENDS */
+.insight-box{background:linear-gradient(135deg,rgba(200,137,122,0.07),rgba(184,174,201,0.1));border:1px solid rgba(200,137,122,0.18);border-radius:12px;padding:0.9rem 1.1rem;margin-bottom:0.6rem;}
+.insight-box p{font-size:0.66rem;color:var(--deep);line-height:1.65;}
+.insight-label{font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--rose);font-weight:500;margin-bottom:0.25rem;}
+.no-data{font-size:0.65rem;color:var(--gold);text-align:center;padding:1.5rem;font-style:italic;}
+.trend-title{font-size:0.56rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:0.7rem;}
+.bar-chart{display:flex;align-items:flex-end;gap:0.3rem;height:55px;margin-top:0.4rem;}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:0.2rem;flex:1;}
+.bar-fill{width:100%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--rose),var(--blush));min-height:2px;}
+.bar-lbl{font-size:0.45rem;color:var(--gold);text-align:center;}
+.streak-wrap{text-align:center;padding:0.6rem;}
+.streak-num{font-family:'Cormorant Garamond',serif;font-size:2.4rem;color:var(--rose);}
+.streak-lbl{font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--deep);}
+/* HISTORY */
+.log-entry{background:white;border-radius:10px;padding:0.75rem 0.9rem;margin-bottom:0.45rem;border:1px solid rgba(200,137,122,0.1);}
+.log-date{font-size:0.56rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.35rem;}
+.log-pills{display:flex;flex-wrap:wrap;gap:0.25rem;margin-top:0.25rem;}
+.log-pill{padding:0.12rem 0.5rem;border-radius:10px;font-size:0.53rem;background:var(--mist);color:var(--deep);}
+</style>
+</head>
+<body>
+<nav>
+  <button class="nav-btn active" onclick="showPage('checkin',this)">✦ Check-in</button>
+  <button class="nav-btn" onclick="showPage('trends',this)">Trends</button>
+  <button class="nav-btn" onclick="showPage('history',this)">History</button>
+</nav>
+
+<!-- CHECK-IN -->
+<div class="page active" id="page-checkin">
+  <div style="padding-top:1.4rem"><h1>Daily Check-in</h1><p class="subtitle" id="checkin-date"></p></div>
+
+  <!-- Banner -->
+  <div class="banner-row">
+    <div class="banner-card">
+      <div class="banner-label">Days to Wedding 💍</div>
+      <div class="banner-num" id="wedding-days">—</div>
+      <div class="banner-sub">Sept 17, 2026</div>
+    </div>
+    <div class="banner-card">
+      <div class="banner-label">Cycle Phase</div>
+      <div id="phase-pill-wrap"><div class="phase-pill" id="cycle-phase-badge">—</div></div>
+      <div class="phase-tip" id="cycle-tip"></div>
+    </div>
+  </div>
+
+  <!-- Last period (set once) -->
+  <div class="card">
+    <div class="card-title">Cycle Calibration</div>
+    <div class="field">
+      <label>Last period start date</label>
+      <input type="date" id="last-period" onchange="savePeriodDate()">
+    </div>
+  </div>
+
+  <!-- Day nav -->
+  <div class="day-nav">
+    <button class="day-nav-btn" onclick="changeDay(-1)">← Prev</button>
+    <span id="selected-date-label"></span>
+    <button class="day-nav-btn" id="next-day-btn" onclick="changeDay(1)">Next →</button>
+  </div>
+
+  <!-- Skin -->
+  <div class="card">
+    <div class="card-title">Skin Today</div>
+    <div class="pills">
+      <button class="pill" onclick="selectPill(this,'skin','Clear')">✨ Clear</button>
+      <button class="pill" onclick="selectPill(this,'skin','Mild')">🌤 Mild</button>
+      <button class="pill" onclick="selectPill(this,'skin','Moderate')">🌥 Moderate</button>
+      <button class="pill" onclick="selectPill(this,'skin','Flare')">🔥 Flare</button>
+    </div>
+  </div>
+
+
+
+  <!-- Skincare -->
+  <div class="card">
+    <div class="card-title">Skincare Routine</div>
+    <div class="check-row"><input type="checkbox" id="hair-wash"><label for="hair-wash">🧴 Washed hair</label></div>
+    <div class="section-sub am" style="margin-top:0.5rem">☀️ Morning</div>
+    <div class="check-row"><input type="checkbox" id="am-moisturizer"><label for="am-moisturizer">Moisturizer</label></div>
+    <div class="check-row"><input type="checkbox" id="am-sunscreen"><label for="am-sunscreen">Sunscreen</label></div>
+    <div class="section-sub pm">🌙 Evening</div>
+    <div class="check-row"><input type="checkbox" id="pm-azelaic"><label for="pm-azelaic">Azelaic Acid 15%</label></div>
+    <div class="check-row"><input type="checkbox" id="pm-led"><label for="pm-led">LED Mask</label></div>
+    <div class="check-row"><input type="checkbox" id="pm-moisturizer"><label for="pm-moisturizer">Moisturizer</label></div>
+  </div>
+
+  <!-- Sleep -->
+  <div class="card">
+    <div class="card-title">Oura Sleep Score (last night)</div>
+    <div class="field">
+      <input type="number" id="sleep-score" min="0" max="100" placeholder="e.g. 82" class="w80">
+    </div>
+    <div style="font-size:0.55rem;color:var(--gold)">Goal: 9h · Enter your Oura score 0–100</div>
+  </div>
+
+  <!-- Caffeine -->
+  <div class="card">
+    <div class="card-title">Caffeine</div>
+    <div id="caff-entries"></div>
+    <button class="add-caff-btn" onclick="addCaffRow()">+ Add caffeine</button>
+  </div>
+
+  <!-- Alcohol -->
+  <div class="card">
+    <div class="card-title">Alcohol</div>
+    <div class="field">
+      <div class="pills" id="alcohol-type-pills">
+        <button class="pill" onclick="selectPill(this,'alcohol-type','None')">None</button>
+        <button class="pill" onclick="selectPill(this,'alcohol-type','Wine')">Wine</button>
+        <button class="pill" onclick="selectPill(this,'alcohol-type','Beer')">Beer</button>
+        <button class="pill" onclick="selectPill(this,'alcohol-type','Spirits')">Spirits</button>
+        <button class="pill" onclick="selectPill(this,'alcohol-type','Mixed')">Mixed</button>
+      </div>
+    </div>
+    <div class="field" id="alcohol-count-field" style="display:none">
+      <label>Number of drinks</label>
+      <input type="number" id="alcohol-count" min="0" max="20" value="1" class="w80">
+    </div>
+  </div>
+
+  <!-- Meds -->
+  <div class="card">
+    <div class="card-title">Medications</div>
+    <div class="field">
+      <label>ADHD</label>
+      <div class="pills" id="adhd-pills">
+        <button class="pill" onclick="selectPill(this,'adhd','None')">No ADHD meds</button>
+        <button class="pill" onclick="selectPill(this,'adhd','Vyvanse')">Vyvanse</button>
+        <button class="pill" onclick="selectPill(this,'adhd','Adderall XR')">Adderall XR</button>
+        <button class="pill" onclick="selectPill(this,'adhd','Adderall IR')">Adderall IR</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Other</label>
+      <div class="pills" id="other-meds-pills">
+        <button class="pill" onclick="toggleMultiPill(this,'Ativan')">Ativan</button>
+        <button class="pill" onclick="toggleMultiPill(this,'Propranolol')">Propranolol</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gut -->
+  <div class="card">
+    <div class="card-title">Bowel Health</div>
+    <div class="field">
+      <label>Times today</label>
+      <input type="number" id="poop-count" min="0" max="10" value="0" class="w80">
+    </div>
+    <div class="field">
+      <label>Bristol Stool Type (1–7)</label>
+      <div class="pills" id="bristol-pills">
+        <button class="pill" onclick="selectPill(this,'bristol','1')" title="Hard lumps">1</button>
+        <button class="pill" onclick="selectPill(this,'bristol','2')" title="Lumpy">2</button>
+        <button class="pill" onclick="selectPill(this,'bristol','3')" title="Cracked">3</button>
+        <button class="pill" onclick="selectPill(this,'bristol','4')" title="Ideal ✓">4 ✓</button>
+        <button class="pill" onclick="selectPill(this,'bristol','5')" title="Soft">5</button>
+        <button class="pill" onclick="selectPill(this,'bristol','6')" title="Fluffy">6</button>
+        <button class="pill" onclick="selectPill(this,'bristol','7')" title="Liquid">7</button>
+      </div>
+      <div style="font-size:0.52rem;color:var(--gold);margin-top:0.3rem">3–4 ideal · 1–2 constipation · 5–7 loose</div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="card">
+    <div class="card-title">Notes</div>
+    <textarea id="notes" placeholder="Anything else…"></textarea>
+  </div>
+
+  <button class="save-btn" onclick="saveEntry()">Save Entry</button>
+  <div class="save-msg" id="save-msg"></div>
+</div>
+
+<!-- TRENDS -->
+<div class="page" id="page-trends">
+  <div style="padding-top:1.4rem"><h1>Trends</h1><p class="subtitle">Patterns from your logs</p></div>
+  <div class="card"><div class="streak-wrap"><div class="streak-num" id="streak-num">0</div><div class="streak-lbl">Day Streak 🔥</div></div></div>
+  <div class="card"><div class="trend-title">Skin This Week</div><div class="bar-chart" id="skin-bar-chart"></div></div>
+  <div class="card"><div class="trend-title">Sleep Score vs Skin</div><div id="sleep-skin-insight"><div class="no-data">Log 5+ days to see patterns</div></div></div>
+  <div class="card"><div class="trend-title">Alcohol → Next-day Skin</div><div id="alcohol-skin-insight"><div class="no-data">Log 5+ days to see patterns</div></div></div>
+  <div class="card"><div class="trend-title">Caffeine Timing vs Sleep Score</div><div id="caff-sleep-insight"><div class="no-data">Log 5+ days to see patterns</div></div></div>
+  <div class="card"><div class="trend-title">Gut Health</div><div id="gut-insight"><div class="no-data">Log 3+ days to see patterns</div></div></div>
+  <div class="card"><div class="trend-title">Cycle Phase vs Skin</div><div id="cycle-skin-insight"><div class="no-data">Log 7+ days to see patterns</div></div></div>
+  <div class="card"><div class="trend-title">Meds vs Skin</div><div id="meds-skin-insight"><div class="no-data">Log 5+ days to see patterns</div></div></div>
+  <div class="card"><div class="trend-title">Skincare Routine Consistency</div><div id="routine-insight"><div class="no-data">Log 3+ days to see patterns</div></div></div>
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="page-history">
+  <div style="padding-top:1.4rem"><h1>History</h1><p class="subtitle">All entries</p></div>
+  <div id="history-list"></div>
+</div>
+
+<script>
+const WEDDING = new Date('2026-09-17');
+const SKIN_SCORE = {Clear:4,Mild:3,Moderate:2,Flare:1};
+const SKIN_EMOJI = {Clear:'✨',Mild:'🌤',Moderate:'🌥',Flare:'🔥'};
+const PHASE_TIPS = {
+  Menstrual:'Rest, gentle skincare, iron-rich foods.',
+  Follicular:'Energy rising. Good week for new habits.',
+  Ovulation:'Peak glow window. Great for events.',
+  Luteal:'Focus on fiber, reduce sugar + alcohol. Skin may be reactive.'
+};
+
+let activeDate = toDateStr(new Date());
+const state = {skin:'','alcohol-type':'',adhd:'',bristol:'',otherMeds:new Set()};
+let caffEntries = [];
+
+function toDateStr(d){return d.toISOString().split('T')[0];}
+function offsetDate(str,days){const d=new Date(str+'T12:00:00');d.setDate(d.getDate()+days);return toDateStr(d);}
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='trends')renderTrends();
+  if(id==='history')renderHistory();
+}
+
+// --- CYCLE ---
+function savePeriodDate(){
+  const v=document.getElementById('last-period').value;
+  if(!v)return;
+  try{localStorage.setItem('lastPeriod',v);}catch(e){}
+  updateCycleDisplay(activeDate);
+}
+
+function updateCycleDisplay(dateStr){
+  const lp=document.getElementById('last-period').value;
+  if(!lp){document.getElementById('cycle-phase-badge').textContent='Set date →';return;}
+  const start=new Date(lp+'T12:00:00');
+  const cur=new Date(dateStr+'T12:00:00');
+  const day=Math.floor((cur-start)/86400000)%30+1;
+  let phase,cls;
+  if(day<=5){phase='Menstrual';cls='phase-menstrual';}
+  else if(day<=13){phase='Follicular';cls='phase-follicular';}
+  else if(day<=16){phase='Ovulation';cls='phase-ovulation';}
+  else{phase='Luteal';cls='phase-luteal';}
+  const badge=document.getElementById('cycle-phase-badge');
+  badge.textContent=`Day ${day} · ${phase}`;
+  badge.className='phase-pill '+cls;
+  document.getElementById('cycle-tip').textContent=PHASE_TIPS[phase]||'';
+}
+
+// --- DAY NAV ---
+function changeDay(delta){
+  const next=offsetDate(activeDate,delta);
+  if(next>toDateStr(new Date()))return;
+  activeDate=next;
+  loadDay(activeDate);
+}
+
+function loadDay(dateStr){
+  const today=toDateStr(new Date());
+  const d=new Date(dateStr+'T12:00:00');
+  document.getElementById('checkin-date').textContent=d.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('selected-date-label').textContent=dateStr===today?'Today':dateStr;
+  document.getElementById('next-day-btn').disabled=dateStr===today;
+  updateCycleDisplay(dateStr);
+
+  // Reset
+  ['skin','alcohol-type','adhd','bristol'].forEach(k=>state[k]='');
+  state.otherMeds=new Set();
+  caffEntries=[];
+  document.querySelectorAll('.pills .pill').forEach(p=>p.classList.remove('selected','sel-lav','sel-green'));
+  ['showered','hair-wash','am-moisturizer','am-sunscreen','pm-azelaic','pm-led','pm-moisturizer'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
+  document.getElementById('sleep-score').value='';
+  document.getElementById('poop-count').value=0;
+  document.getElementById('alcohol-count').value=1;
+  document.getElementById('alcohol-count-field').style.display='none';
+  document.getElementById('notes').value='';
+  renderCaffUI();
+
+  // Load saved
+  try{
+    const logs=JSON.parse(localStorage.getItem('glowLogs')||'{}');
+    const e=logs[dateStr];
+    if(!e)return;
+    if(e.skin){state.skin=e.skin;document.querySelector(`.pill[onclick*="'skin','${e.skin}'"]`)?.classList.add('selected');}
+    if(e.showered)document.getElementById('showered').checked=true;
+    if(e.hairWash)document.getElementById('hair-wash').checked=true;
+    if(e.skincare){
+      ['am-moisturizer','am-sunscreen','pm-azelaic','pm-led','pm-moisturizer'].forEach(id=>{
+        const key=id.replace(/-([a-z])/g,(_,c)=>c.toUpperCase());
+        if(e.skincare[key])document.getElementById(id).checked=true;
+      });
+    }
+    if(e.sleepScore)document.getElementById('sleep-score').value=e.sleepScore;
+    if(e.caffeine)caffEntries=JSON.parse(JSON.stringify(e.caffeine));
+    renderCaffUI();
+    if(e.alcoholType){
+      state['alcohol-type']=e.alcoholType;
+      document.querySelector(`#alcohol-type-pills .pill[onclick*="${e.alcoholType}"]`)?.classList.add('selected');
+      if(e.alcoholType!=='None'){document.getElementById('alcohol-count-field').style.display='block';document.getElementById('alcohol-count').value=e.alcoholCount||1;}
+    }
+    if(e.adhd){state.adhd=e.adhd;document.querySelector(`#adhd-pills .pill[onclick*="${e.adhd}"]`)?.classList.add('selected');}
+    if(e.otherMeds){state.otherMeds=new Set(e.otherMeds);document.querySelectorAll('#other-meds-pills .pill').forEach(p=>{if(state.otherMeds.has(p.textContent.trim()))p.classList.add('selected');});}
+    if(e.bristol){
+      state.bristol=e.bristol;
+      const btn=document.querySelector(`#bristol-pills .pill[onclick*="'${e.bristol}'"]`);
+      if(btn){const n=parseInt(e.bristol);btn.classList.add(n>=3&&n<=4?'sel-green':n<=2||n>=6?'selected':'sel-lav');}
+    }
+    if(e.poopCount)document.getElementById('poop-count').value=e.poopCount;
+    if(e.notes)document.getElementById('notes').value=e.notes;
+  }catch(err){}
+
+  // Default None alcohol if nothing loaded
+  if(!state['alcohol-type']){
+    const nb=document.querySelector('#alcohol-type-pills .pill');
+    if(nb){nb.classList.add('selected');state['alcohol-type']='None';}
+  }
+}
+
+// --- PILLS ---
+function selectPill(el,group,val){
+  const container=el.closest('.pills');
+  container.querySelectorAll('.pill').forEach(p=>p.classList.remove('selected','sel-lav','sel-green'));
+  el.classList.add('selected');
+  state[group]=val;
+  if(group==='alcohol-type')document.getElementById('alcohol-count-field').style.display=val==='None'?'none':'block';
+  if(group==='bristol'){
+    el.classList.remove('selected');
+    const n=parseInt(val);
+    el.classList.add(n>=3&&n<=4?'sel-green':n<=2||n>=6?'selected':'sel-lav');
+  }
+}
+
+function toggleMultiPill(el,val){
+  if(state.otherMeds.has(val)){state.otherMeds.delete(val);el.classList.remove('selected');}
+  else{state.otherMeds.add(val);el.classList.add('selected');}
+}
+
+// --- CAFFEINE ---
+const CAFF_TYPES=['Coffee','Matcha','Energy Drink','Pre-workout'];
+function addCaffRow(type='',mg='',time='AM'){
+  caffEntries.push({type,mg,time});
+  renderCaffUI();
+}
+function renderCaffUI(){
+  const el=document.getElementById('caff-entries');
+  if(!caffEntries.length){el.innerHTML='';return;}
+  el.innerHTML=caffEntries.map((c,i)=>`
+    <div class="caff-row">
+      <div>
+        <div style="font-size:0.55rem;color:var(--deep);margin-bottom:0.25rem;letter-spacing:0.05em;">Type</div>
+        <select onchange="caffEntries[${i}].type=this.value" style="border:1px solid var(--blush);border-radius:7px;padding:0.38rem 0.5rem;font-size:0.65rem;font-family:'DM Sans',sans-serif;color:var(--deep);background:white;outline:none;">
+          <option value="">Select</option>
+          ${CAFF_TYPES.map(t=>`<option ${c.type===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div style="font-size:0.55rem;color:var(--deep);margin-bottom:0.25rem;letter-spacing:0.05em;">mg</div>
+        <input type="number" value="${c.mg}" min="0" max="1000" placeholder="mg" onchange="caffEntries[${i}].mg=this.value" style="width:65px;border:1px solid var(--blush);border-radius:7px;padding:0.38rem 0.5rem;font-size:0.65rem;font-family:'DM Sans',sans-serif;color:var(--deep);">
+      </div>
+      <div>
+        <div style="font-size:0.55rem;color:var(--deep);margin-bottom:0.25rem;letter-spacing:0.05em;">Time</div>
+        <div class="caff-time-pills">
+          ${['AM','PM','Evening'].map(t=>`<button class="caff-time-pill ${c.time===t?'active':''}" onclick="caffEntries[${i}].time='${t}';renderCaffUI()">${t}</button>`).join('')}
+          <button onclick="caffEntries.splice(${i},1);renderCaffUI()" style="background:none;border:none;color:var(--blush);cursor:pointer;font-size:0.7rem;padding:0 0.2rem;">✕</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// --- SAVE ---
+function saveEntry(){
+  const entry={
+    date:activeDate,
+    skin:state.skin,
+    hairWash:document.getElementById('hair-wash').checked,
+    skincare:{
+      amMoisturizer:document.getElementById('am-moisturizer').checked,
+      amSunscreen:document.getElementById('am-sunscreen').checked,
+      pmAzelaic:document.getElementById('pm-azelaic').checked,
+      pmLed:document.getElementById('pm-led').checked,
+      pmMoisturizer:document.getElementById('pm-moisturizer').checked,
+    },
+    sleepScore:parseInt(document.getElementById('sleep-score').value)||null,
+    caffeine:caffEntries.filter(c=>c.type||c.mg),
+    alcoholType:state['alcohol-type'],
+    alcoholCount:state['alcohol-type']==='None'?0:parseInt(document.getElementById('alcohol-count').value)||0,
+    adhd:state.adhd,
+    otherMeds:[...state.otherMeds],
+    bristol:state.bristol,
+    poopCount:parseInt(document.getElementById('poop-count').value)||0,
+    notes:document.getElementById('notes').value,
+    cycleDay:(()=>{
+      const lp=document.getElementById('last-period').value;
+      if(!lp)return null;
+      return Math.floor((new Date(activeDate+'T12:00:00')-new Date(lp+'T12:00:00'))/86400000)%30+1;
+    })()
+  };
+  try{
+    const logs=JSON.parse(localStorage.getItem('glowLogs')||'{}');
+    logs[activeDate]=entry;
+    localStorage.setItem('glowLogs',JSON.stringify(logs));
+    const msg=document.getElementById('save-msg');
+    msg.textContent='✓ Saved!';setTimeout(()=>msg.textContent='',2000);
+  }catch(e){document.getElementById('save-msg').textContent='Error saving.';}
+}
+
+function getLogs(){
+  try{return Object.values(JSON.parse(localStorage.getItem('glowLogs')||'{}')).sort((a,b)=>a.date.localeCompare(b.date));}
+  catch(e){return[];}
+}
+
+// --- TRENDS ---
+function renderTrends(){
+  const logs=getLogs();
+  // streak
+  let streak=0;const dates=new Set(logs.map(l=>l.date));let d=new Date();
+  while(dates.has(toDateStr(d))){streak++;d.setDate(d.getDate()-1);}
+  document.getElementById('streak-num').textContent=streak;
+  // skin bar
+  const bc=document.getElementById('skin-bar-chart');bc.innerHTML='';
+  const recent=logs.slice(-7);
+  if(recent.length){recent.forEach(l=>{const s=SKIN_SCORE[l.skin]||0;const col=document.createElement('div');col.className='bar-col';col.innerHTML=`<div class="bar-fill" style="height:${s/4*100}%"></div><div class="bar-lbl">${l.date.slice(5)}<br>${SKIN_EMOJI[l.skin]||''}</div>`;bc.appendChild(col);});}
+  else bc.innerHTML='<div class="no-data">No data yet</div>';
+  // sleep vs skin
+  const ssi=document.getElementById('sleep-skin-insight');
+  const sv=logs.filter(l=>l.skin&&l.sleepScore);
+  if(sv.length>=5){
+    const hi=sv.filter(l=>l.sleepScore>=80),lo=sv.filter(l=>l.sleepScore<70);
+    const ah=hi.length?hi.reduce((a,b)=>a+(SKIN_SCORE[b.skin]||0),0)/hi.length:null;
+    const al=lo.length?lo.reduce((a,b)=>a+(SKIN_SCORE[b.skin]||0),0)/lo.length:null;
+    if(ah&&al)ssi.innerHTML=`<div class="insight-box"><div class="insight-label">Pattern</div><p>Sleep score 80+: avg skin <strong>${ah.toFixed(1)}/4</strong><br>Sleep score &lt;70: avg skin <strong>${al.toFixed(1)}/4</strong><br>${ah-al>0.3?'💤 Higher sleep score correlates with better skin.':'No strong signal yet — keep logging.'}</p></div>`;
+    else ssi.innerHTML=`<div class="insight-box"><p>Need more variation in sleep scores.</p></div>`;
+  }else ssi.innerHTML='<div class="no-data">Log 5+ days to see patterns</div>';
+  // alcohol vs skin
+  const asi=document.getElementById('alcohol-skin-insight');
+  if(logs.length>=5){
+    const dr=[],so=[];
+    logs.forEach((l,i)=>{if(i===0)return;const prev=logs[i-1];const sc=SKIN_SCORE[l.skin];if(!sc)return;if(prev.alcoholCount>0)dr.push(sc);else so.push(sc);});
+    if(dr.length&&so.length){
+      const ad=dr.reduce((a,b)=>a+b,0)/dr.length,as2=so.reduce((a,b)=>a+b,0)/so.length;
+      asi.innerHTML=`<div class="insight-box"><div class="insight-label">Next-day skin</div><p>After drinking: <strong>${ad.toFixed(1)}/4</strong><br>After no alcohol: <strong>${as2.toFixed(1)}/4</strong><br>${as2-ad>0.4?'🍷 Alcohol appears to affect your skin next day.':'No strong pattern yet.'}</p></div>`;
+    }else asi.innerHTML='<div class="no-data">Need alcohol variation to compare</div>';
+  }else asi.innerHTML='<div class="no-data">Log 5+ days to see patterns</div>';
+  // caffeine vs sleep
+  const csi=document.getElementById('caff-sleep-insight');
+  const cv=logs.filter(l=>l.sleepScore&&l.caffeine&&l.caffeine.length);
+  if(cv.length>=5){
+    const late=cv.filter(l=>l.caffeine.some(c=>c.time==='Evening'||c.time==='PM'));
+    const early=cv.filter(l=>l.caffeine.length&&l.caffeine.every(c=>c.time==='AM'));
+    if(late.length&&early.length){
+      const al2=late.reduce((a,b)=>a+b.sleepScore,0)/late.length;
+      const ae=early.reduce((a,b)=>a+b.sleepScore,0)/early.length;
+      csi.innerHTML=`<div class="insight-box"><div class="insight-label">Caffeine timing</div><p>PM/Evening caffeine days: avg sleep score <strong>${al2.toFixed(0)}</strong><br>AM-only caffeine days: avg sleep score <strong>${ae.toFixed(0)}</strong><br>${ae-al2>3?'☕ Late caffeine appears to lower your sleep score.':'No strong timing signal yet.'}</p></div>`;
+    }else csi.innerHTML='<div class="insight-box"><p>Need both AM-only and PM caffeine days to compare.</p></div>';
+  }else csi.innerHTML='<div class="no-data">Log 5+ days with caffeine to see patterns</div>';
+  // gut
+  const gi=document.getElementById('gut-insight');
+  const gv=logs.filter(l=>l.bristol);
+  if(gv.length>=3){
+    const r=gv.slice(-7);
+    const ab=r.reduce((a,b)=>a+parseInt(b.bristol),0)/r.length;
+    const ap=r.reduce((a,b)=>a+(b.poopCount||0),0)/r.length;
+    gi.innerHTML=`<div class="insight-box"><div class="insight-label">Last 7 days</div><p>Avg Bristol: <strong>${ab.toFixed(1)}</strong> ${ab>=3&&ab<=4?'✅ ideal':ab<3?'⚠️ leaning constipated':'⚠️ leaning loose'}<br>Avg frequency: <strong>${ap.toFixed(1)}x/day</strong></p></div>`;
+  }else gi.innerHTML='<div class="no-data">Log 3+ days to see patterns</div>';
+  // cycle vs skin
+  const ci=document.getElementById('cycle-skin-insight');
+  const cyv=logs.filter(l=>l.skin&&l.cycleDay);
+  if(cyv.length>=7){
+    const ph={Menstrual:[],Follicular:[],Ovulation:[],Luteal:[]};
+    cyv.forEach(l=>{const sc=SKIN_SCORE[l.skin];if(!sc)return;const d2=l.cycleDay;if(d2<=5)ph.Menstrual.push(sc);else if(d2<=13)ph.Follicular.push(sc);else if(d2<=16)ph.Ovulation.push(sc);else ph.Luteal.push(sc);});
+    const rows=Object.entries(ph).filter(([,v])=>v.length).map(([p,s])=>`<strong>${p}</strong>: ${(s.reduce((a,b)=>a+b,0)/s.length).toFixed(1)}/4`).join('<br>');
+    ci.innerHTML=`<div class="insight-box"><div class="insight-label">Avg skin by phase</div><p>${rows}</p></div>`;
+  }else ci.innerHTML='<div class="no-data">Log 7+ days to see patterns</div>';
+  // meds vs skin
+  const mi=document.getElementById('meds-skin-insight');
+  const medv=logs.filter(l=>l.skin&&l.adhd);
+  if(medv.length>=5){
+    const medMap={};
+    medv.forEach(l=>{if(!medMap[l.adhd])medMap[l.adhd]=[];medMap[l.adhd].push(SKIN_SCORE[l.skin]||0);});
+    const rows=Object.entries(medMap).map(([med,scores])=>`<strong>${med}</strong>: avg skin ${(scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1)}/4`).join('<br>');
+    mi.innerHTML=`<div class="insight-box"><div class="insight-label">ADHD med vs skin</div><p>${rows}</p></div>`;
+  }else mi.innerHTML='<div class="no-data">Log 5+ days to see patterns</div>';
+  // routine
+  const ri=document.getElementById('routine-insight');
+  const rv=logs.filter(l=>l.skincare);
+  if(rv.length>=3){
+    const items={amMoisturizer:'AM Moisturizer',amSunscreen:'AM Sunscreen',pmAzelaic:'Azelaic Acid',pmLed:'LED Mask',pmMoisturizer:'PM Moisturizer'};
+    const rows=Object.entries(items).map(([k,label])=>`<strong>${label}</strong>: ${Math.round(rv.filter(l=>l.skincare[k]).length/rv.length*100)}%`).join('<br>');
+    ri.innerHTML=`<div class="insight-box"><div class="insight-label">Consistency (${rv.length} days)</div><p>${rows}</p></div>`;
+  }else ri.innerHTML='<div class="no-data">Log 3+ days to see patterns</div>';
+}
+
+// --- HISTORY ---
+function renderHistory(){
+  const logs=getLogs().reverse();
+  const el=document.getElementById('history-list');
+  if(!logs.length){el.innerHTML='<div class="no-data">No entries yet</div>';return;}
+  el.innerHTML=logs.map(l=>{
+    const pills=[
+      l.skin&&`<span class="log-pill">${SKIN_EMOJI[l.skin]||''} ${l.skin}</span>`,
+      l.sleepScore&&`<span class="log-pill">💤 ${l.sleepScore}</span>`,
+      l.adhd&&l.adhd!=='None'&&`<span class="log-pill">💊 ${l.adhd}</span>`,
+      l.otherMeds&&l.otherMeds.length&&l.otherMeds.map(m=>`<span class="log-pill">${m}</span>`).join(''),
+      l.alcoholType&&l.alcoholType!=='None'?`<span class="log-pill">🍷 ${l.alcoholCount}x ${l.alcoholType}</span>`:`<span class="log-pill">no alcohol</span>`,
+      l.caffeine&&l.caffeine.length&&l.caffeine.map(c=>`<span class="log-pill">☕ ${c.type||'caff'} ${c.mg?c.mg+'mg':''} ${c.time}</span>`).join(''),
+      l.bristol&&`<span class="log-pill">💩 type ${l.bristol} ×${l.poopCount}</span>`,
+      l.showered&&`<span class="log-pill">🚿 showered</span>`,
+      l.hairWash&&`<span class="log-pill">🧴 hair wash</span>`,
+      l.cycleDay&&`<span class="log-pill">cycle day ${l.cycleDay}</span>`,
+    ].filter(Boolean).join('');
+    return `<div class="log-entry"><div class="log-date">${new Date(l.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</div><div class="log-pills">${pills}</div>${l.notes?`<div style="font-size:0.58rem;color:var(--deep);margin-top:0.35rem;font-style:italic">${l.notes}</div>`:''}</div>`;
+  }).join('');
+}
+
+// --- INIT ---
+function init(){
+  activeDate=toDateStr(new Date());
+  const diff=Math.ceil((WEDDING-new Date())/86400000);
+  document.getElementById('wedding-days').textContent=diff>0?diff:'🎉';
+  try{const lp=localStorage.getItem('lastPeriod');if(lp)document.getElementById('last-period').value=lp;}catch(e){}
+  loadDay(activeDate);
+}
+init();
+</script>
+</body>
+</html>
